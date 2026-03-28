@@ -1,2 +1,10 @@
 docs_hidden
 HACKATHON\ PLANNING\ /
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
+htmlcov/
+.coverage
+*.egg-info/
+.DS_Store

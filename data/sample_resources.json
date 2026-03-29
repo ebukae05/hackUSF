@@ -1,0 +1,316 @@
+{
+  "metadata": {
+    "description": "Sample resource inventories for ReliefLink fallback data (FT-03)",
+    "state": "FL",
+    "scenario": "Hurricane response — Tampa Bay area",
+    "generated": "2026-03-28",
+    "sources": ["federal", "state", "ngo", "volunteer"]
+  },
+  "resources": [
+    {
+      "resource_id": "fed-001",
+      "type": "supplies",
+      "subtype": "water_pallets",
+      "quantity": 500,
+      "location": {
+        "lat": 27.9506,
+        "lon": -82.4572,
+        "address": "FEMA Staging Area Alpha, Tampa, FL 33602",
+        "fips_code": "12057"
+      },
+      "owner_agency_id": "FEMA",
+      "status": "available",
+      "source_category": "federal"
+    },
+    {
+      "resource_id": "fed-002",
+      "type": "supplies",
+      "subtype": "mre_cases",
+      "quantity": 2000,
+      "location": {
+        "lat": 27.9506,
+        "lon": -82.4572,
+        "address": "FEMA Staging Area Alpha, Tampa, FL 33602",
+        "fips_code": "12057"
+      },
+      "owner_agency_id": "FEMA",
+      "status": "available",
+      "source_category": "federal"
+    },
+    {
+      "resource_id": "fed-003",
+      "type": "equipment",
+      "subtype": "generator_large",
+      "quantity": 25,
+      "location": {
+        "lat": 30.3322,
+        "lon": -81.6557,
+        "address": "FEMA Region IV Warehouse, Jacksonville, FL 32202",
+        "fips_code": "12031"
+      },
+      "owner_agency_id": "FEMA",
+      "status": "available",
+      "source_category": "federal"
+    },
+    {
+      "resource_id": "fed-004",
+      "type": "personnel",
+      "subtype": "fema_response_team",
+      "quantity": 45,
+      "location": {
+        "lat": 27.9506,
+        "lon": -82.4572,
+        "address": "FEMA Staging Area Alpha, Tampa, FL 33602",
+        "fips_code": "12057"
+      },
+      "owner_agency_id": "FEMA",
+      "status": "available",
+      "source_category": "federal"
+    },
+    {
+      "resource_id": "fed-005",
+      "type": "funds",
+      "subtype": "individual_assistance",
+      "quantity": 5000000,
+      "location": {
+        "lat": 27.9506,
+        "lon": -82.4572,
+        "address": "FEMA Regional Office, Tampa, FL",
+        "fips_code": "12057"
+      },
+      "owner_agency_id": "FEMA",
+      "status": "available",
+      "source_category": "federal"
+    },
+    {
+      "resource_id": "state-001",
+      "type": "shelter",
+      "subtype": "emergency_shelter_capacity",
+      "quantity": 800,
+      "location": {
+        "lat": 27.9728,
+        "lon": -82.4677,
+        "address": "Hillsborough County Emergency Shelter, Tampa, FL 33605",
+        "fips_code": "12057"
+      },
+      "owner_agency_id": "FL_EMA",
+      "status": "available",
+      "source_category": "state"
+    },
+    {
+      "resource_id": "state-002",
+      "type": "equipment",
+      "subtype": "water_rescue_boat",
+      "quantity": 12,
+      "location": {
+        "lat": 27.8389,
+        "lon": -82.5317,
+        "address": "Florida State Guard Station, Tampa, FL 33609",
+        "fips_code": "12057"
+      },
+      "owner_agency_id": "FL_EMA",
+      "status": "available",
+      "source_category": "state"
+    },
+    {
+      "resource_id": "state-003",
+      "type": "supplies",
+      "subtype": "medical_supply_kits",
+      "quantity": 350,
+      "location": {
+        "lat": 28.0169,
+        "lon": -82.1270,
+        "address": "FL DOH Emergency Cache, Plant City, FL 33563",
+        "fips_code": "12057"
+      },
+      "owner_agency_id": "FL_DOH",
+      "status": "available",
+      "source_category": "state"
+    },
+    {
+      "resource_id": "state-004",
+      "type": "personnel",
+      "subtype": "national_guard_troops",
+      "quantity": 150,
+      "location": {
+        "lat": 27.9728,
+        "lon": -82.4677,
+        "address": "Camp Blanding Annex, FL",
+        "fips_code": "12057"
+      },
+      "owner_agency_id": "FL_EMA",
+      "status": "available",
+      "source_category": "state"
+    },
+    {
+      "resource_id": "state-005",
+      "type": "equipment",
+      "subtype": "mobile_command_unit",
+      "quantity": 3,
+      "location": {
+        "lat": 27.7636,
+        "lon": -82.6401,
+        "address": "Pinellas County EOC, Largo, FL 33770",
+        "fips_code": "12103"
+      },
+      "owner_agency_id": "FL_EMA",
+      "status": "available",
+      "source_category": "state"
+    },
+    {
+      "resource_id": "ngo-001",
+      "type": "shelter",
+      "subtype": "red_cross_shelter",
+      "quantity": 400,
+      "location": {
+        "lat": 27.9272,
+        "lon": -82.4617,
+        "address": "Red Cross Tampa Chapter, Tampa, FL 33606",
+        "fips_code": "12057"
+      },
+      "owner_agency_id": "RED_CROSS",
+      "status": "available",
+      "source_category": "ngo"
+    },
+    {
+      "resource_id": "ngo-002",
+      "type": "supplies",
+      "subtype": "hygiene_kits",
+      "quantity": 1200,
+      "location": {
+        "lat": 27.9272,
+        "lon": -82.4617,
+        "address": "Red Cross Tampa Chapter, Tampa, FL 33606",
+        "fips_code": "12057"
+      },
+      "owner_agency_id": "RED_CROSS",
+      "status": "available",
+      "source_category": "ngo"
+    },
+    {
+      "resource_id": "ngo-003",
+      "type": "personnel",
+      "subtype": "medical_volunteers",
+      "quantity": 60,
+      "location": {
+        "lat": 27.7673,
+        "lon": -82.6387,
+        "address": "Pinellas Disaster Response Team HQ, Clearwater, FL 33755",
+        "fips_code": "12103"
+      },
+      "owner_agency_id": "VOAD_PINELLAS",
+      "status": "available",
+      "source_category": "ngo"
+    },
+    {
+      "resource_id": "ngo-004",
+      "type": "supplies",
+      "subtype": "food_boxes",
+      "quantity": 3000,
+      "location": {
+        "lat": 27.8706,
+        "lon": -82.3213,
+        "address": "Feeding Tampa Bay, Brandon, FL 33511",
+        "fips_code": "12057"
+      },
+      "owner_agency_id": "FEEDING_TB",
+      "status": "available",
+      "source_category": "ngo"
+    },
+    {
+      "resource_id": "vol-001",
+      "type": "personnel",
+      "subtype": "community_volunteers",
+      "quantity": 200,
+      "location": {
+        "lat": 27.7676,
+        "lon": -82.6387,
+        "address": "Community Volunteer Hub, Clearwater, FL 33755",
+        "fips_code": "12103"
+      },
+      "owner_agency_id": "VOAD_PINELLAS",
+      "status": "available",
+      "source_category": "volunteer"
+    },
+    {
+      "resource_id": "vol-002",
+      "type": "equipment",
+      "subtype": "chainsaw_teams",
+      "quantity": 15,
+      "location": {
+        "lat": 27.5236,
+        "lon": -82.5732,
+        "address": "Manatee CERT Depot, Bradenton, FL 34205",
+        "fips_code": "12081"
+      },
+      "owner_agency_id": "VOAD_MANATEE",
+      "status": "available",
+      "source_category": "volunteer"
+    },
+    {
+      "resource_id": "vol-003",
+      "type": "supplies",
+      "subtype": "clothing_bundles",
+      "quantity": 500,
+      "location": {
+        "lat": 27.9272,
+        "lon": -82.4617,
+        "address": "Salvation Army Tampa, Tampa, FL 33603",
+        "fips_code": "12057"
+      },
+      "owner_agency_id": "SALVATION_ARMY",
+      "status": "available",
+      "source_category": "volunteer"
+    }
+  ],
+  "agencies": [
+    {
+      "agency_id": "FEMA",
+      "name": "Federal Emergency Management Agency",
+      "type": "federal",
+      "jurisdiction": "National"
+    },
+    {
+      "agency_id": "FL_EMA",
+      "name": "Florida Division of Emergency Management",
+      "type": "state",
+      "jurisdiction": "Florida"
+    },
+    {
+      "agency_id": "FL_DOH",
+      "name": "Florida Department of Health",
+      "type": "state",
+      "jurisdiction": "Florida"
+    },
+    {
+      "agency_id": "RED_CROSS",
+      "name": "American Red Cross — Southeast Region",
+      "type": "ngo",
+      "jurisdiction": "Southeast US"
+    },
+    {
+      "agency_id": "VOAD_PINELLAS",
+      "name": "Pinellas VOAD",
+      "type": "volunteer",
+      "jurisdiction": "Pinellas County, FL"
+    },
+    {
+      "agency_id": "VOAD_MANATEE",
+      "name": "Manatee County CERT",
+      "type": "volunteer",
+      "jurisdiction": "Manatee County, FL"
+    },
+    {
+      "agency_id": "FEEDING_TB",
+      "name": "Feeding Tampa Bay",
+      "type": "ngo",
+      "jurisdiction": "Tampa Bay, FL"
+    },
+    {
+      "agency_id": "SALVATION_ARMY",
+      "name": "The Salvation Army — Tampa",
+      "type": "volunteer",
+      "jurisdiction": "Tampa, FL"
+    }
+  ]
+}

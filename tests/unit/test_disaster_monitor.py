@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from services.relieflink_agents._mock_models import DisasterEvent, DisasterType, NOAAAlert
+from services.relieflink_agents.models import DisasterEvent, DisasterType, NOAAAlert
 from services.relieflink_agents.disaster_monitor import DisasterMonitorAgent
 
 

@@ -12,7 +12,7 @@ from google.adk.agents.base_agent import BaseAgent
 from google.adk.agents.invocation_context import InvocationContext
 from google.adk.events import Event
 
-from services.relieflink_agents._mock_models import DisasterEvent, DisasterType, NOAAAlert
+from services.relieflink_agents.models import DisasterEvent, DisasterType, NOAAAlert
 from services.relieflink_agents.api_clients import get_disaster_declarations, get_active_alerts
 
 logger = logging.getLogger(__name__)
@@ -89,7 +89,7 @@ class DisasterMonitorAgent(BaseAgent):
 
         active_alerts = [
             NOAAAlert(
-                id=a.get("id", ""),
+                alert_id=a.get("id", ""),
                 event=a.get("event", ""),
                 severity=a.get("severity", "Unknown"),
                 headline=a.get("headline", ""),
@@ -122,7 +122,7 @@ class DisasterMonitorAgent(BaseAgent):
             "affected_population": event.affected_population,
             "active_alerts": [
                 {
-                    "id": a.id, "event": a.event, "severity": a.severity,
+                    "alert_id": a.alert_id, "event": a.event, "severity": a.severity,
                     "headline": a.headline, "area_desc": a.area_desc, "urgency": a.urgency,
                 }
                 for a in event.active_alerts

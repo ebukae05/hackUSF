@@ -1,11 +1,11 @@
-"""Unit tests for temporary mock DisasterEvent dataclass (P-01)."""
+"""Unit tests for core data models (models.py / FT-01)."""
 import pytest
-from services.relieflink_agents._mock_models import DisasterEvent, DisasterType, NOAAAlert
+from services.relieflink_agents.models import DisasterEvent, DisasterType, NOAAAlert
 
 
 def make_alert():
     return NOAAAlert(
-        id="alert-1",
+        alert_id="alert-1",
         event="Hurricane Warning",
         severity="Extreme",
         headline="Hurricane Warning issued for Tampa Bay",
@@ -83,14 +83,14 @@ class TestDisasterEvent:
 class TestNOAAAlert:
     def test_all_fields_accessible(self):
         alert = make_alert()
-        assert alert.id == "alert-1"
+        assert alert.alert_id == "alert-1"
         assert alert.event == "Hurricane Warning"
         assert alert.severity == "Extreme"
         assert alert.urgency == "Immediate"
 
     def test_optional_fields_default_none(self):
         alert = NOAAAlert(
-            id="a1", event="Flood Watch", severity="Moderate",
+            alert_id="a1", event="Flood Watch", severity="Moderate",
             headline="Flood Watch", area_desc="Miami-Dade", urgency="Expected"
         )
         assert alert.onset is None

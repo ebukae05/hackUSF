@@ -58,22 +58,36 @@ def _resources_table(resources: list[dict[str, Any]], agencies: dict[str, str]) 
 
 def _community_points(communities: list[dict[str, Any]], needs: list[dict[str, Any]]) -> list[dict[str, Any]]:
     need_by_tract = {need["community_fips_tract"]: need for need in needs}
+    # Tampa Bay county centers with proper coordinates
     county_centers = {
         "12057": {"lat": 27.95, "lon": -82.46, "county": "Hillsborough"},
-        "12103": {"lat": 27.84, "lon": -82.79, "county": "Pinellas"},
+        "12103": {"lat": 27.77, "lon": -82.68, "county": "Pinellas"},
+        "12081": {"lat": 27.48, "lon": -82.57, "county": "Manatee"},
+        "12101": {"lat": 28.18, "lon": -82.43, "county": "Pasco"},
     }
-    tract_offsets = {}
+    # Track row/col per county for grid layout instead of diagonal drift
+    tract_counters = {}
     points = []
+    cols_per_row = 4  # grid columns before wrapping
+    step = 0.025      # ~2.5km between tracts — census-tract scale
+
     for community in communities:
-        base = county_centers.get(community["county_fips"], {"lat": 27.70, "lon": -82.40, "county": "Florida"})
-        offset = tract_offsets.get(community["county_fips"], 0)
-        tract_offsets[community["county_fips"]] = offset + 1
+        base = county_centers.get(community["county_fips"], {"lat": 27.85, "lon": -82.55, "county": "Tampa Bay"})
+        idx = tract_counters.get(community["county_fips"], 0)
+        tract_counters[community["county_fips"]] = idx + 1
+
+        # Grid layout: row/col offset so tracts cluster around their county center
+        row = idx // cols_per_row
+        col = idx % cols_per_row
+        lat_offset = (row - 1) * step
+        lon_offset = (col - cols_per_row // 2) * step
+
         vulnerability_label, color = _vulnerability_band(float(community["vulnerability_index"]))
         need = need_by_tract.get(community["fips_tract"], {})
         points.append(
             {
-                "lat": round(base["lat"] + offset * 0.08, 4),
-                "lon": round(base["lon"] + offset * 0.08, 4),
+                "lat": round(base["lat"] + lat_offset, 4),
+                "lon": round(base["lon"] + lon_offset, 4),
                 "tract": community["fips_tract"],
                 "county": base["county"],
                 "vulnerability": community["vulnerability_index"],
@@ -82,7 +96,7 @@ def _community_points(communities: list[dict[str, Any]], needs: list[dict[str, A
                 "need_severity": need.get("severity", 0.0),
                 "population": community["population"],
                 "fill_color": color,
-                "radius": 34000,
+                "radius": 3000,
             }
         )
     return points
@@ -90,10 +104,10 @@ def _community_points(communities: list[dict[str, Any]], needs: list[dict[str, A
 
 def _tract_polygons(communities: list[dict[str, Any]], needs: list[dict[str, Any]]) -> list[dict[str, Any]]:
     polygons = []
+    size = 0.018  # ~2km per side — census-tract scale
     for point in _community_points(communities, needs):
         lat = float(point["lat"])
         lon = float(point["lon"])
-        size = 0.16
         polygons.append(
             {
                 **point,
@@ -193,7 +207,7 @@ def main() -> None:
         else:
             deck = pdk.Deck(
                 map_style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
-                initial_view_state=pdk.ViewState(latitude=27.8, longitude=-82.5, zoom=6.3, pitch=0),
+                initial_view_state=pdk.ViewState(latitude=27.85, longitude=-82.55, zoom=9.5, pitch=0),
                 tooltip={
                     "html": (
                         "<b>Tract:</b> {tract}<br/>"

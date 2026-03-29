@@ -30,7 +30,7 @@ function AnimatedCounter({ target, suffix }) {
   }, [target]);
 
   return (
-    <span className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-cloud-signal glow-cyan tabular-nums">
+    <span className="block w-full text-center text-3xl sm:text-4xl lg:text-5xl font-extrabold text-cloud-signal glow-cyan tabular-nums">
       {count.toLocaleString()}{suffix}
     </span>
   );
@@ -64,7 +64,7 @@ export default function ImpactStats() {
               transition={{ duration: 0.5, delay: i * 0.1 }}
               className="relative group"
             >
-              <div className="p-6 sm:p-8 rounded-2xl bg-card border border-border hover:border-electric/30 transition-all duration-300 text-center">
+              <div className="flex h-full flex-col items-center justify-center p-6 sm:p-8 rounded-2xl bg-card border border-border hover:border-electric/30 transition-all duration-300 text-center">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-electric/10 mb-4">
                   <stat.icon className={`h-6 w-6 ${stat.color}`} />
                 </div>

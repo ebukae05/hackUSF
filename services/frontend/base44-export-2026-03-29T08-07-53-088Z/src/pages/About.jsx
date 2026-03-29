@@ -5,7 +5,7 @@ import { Shield, Target, Users, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
-const SUPPLIES_IMAGE = '/images/supplies-loading.svg';
+const SUPPLIES_IMAGE = 'https://media.base44.com/images/public/69c8d61e4c900fc320fad8c2/50415520d_generated_192f0fcc.png';
 
 const team = [
   { name: 'Ana Jaramillo', role: 'Co-Founder' },

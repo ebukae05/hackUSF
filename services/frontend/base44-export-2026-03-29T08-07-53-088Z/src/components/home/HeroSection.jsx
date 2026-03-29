@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { HandHelping, HeartHandshake, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const HERO_IMAGE = '/images/hero-tampa-bay.svg';
+const HERO_IMAGE = 'https://media.base44.com/images/public/69c8d61e4c900fc320fad8c2/165acbe66_generated_00003015.png';
 
 export default function HeroSection() {
   return (

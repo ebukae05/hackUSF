@@ -8,3 +8,5 @@ htmlcov/
 .coverage
 *.egg-info/
 .DS_Store
+.adk/
+*.db

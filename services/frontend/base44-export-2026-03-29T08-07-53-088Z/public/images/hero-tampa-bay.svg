@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">ReliefLink Hero Placeholder</title>
+  <desc id="desc">Placeholder image for Tampa Bay volunteers loading supplies in golden hour.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f7b267"/>
+      <stop offset="55%" stop-color="#f4845f"/>
+      <stop offset="100%" stop-color="#1b4965"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0f2f44"/>
+      <stop offset="100%" stop-color="#1b4965"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  <rect y="560" width="1600" height="340" fill="url(#water)"/>
+  <circle cx="1240" cy="220" r="96" fill="#ffd166" opacity="0.85"/>
+  <rect x="0" y="500" width="1600" height="32" fill="#553d2a" opacity="0.85"/>
+  <rect x="930" y="458" width="420" height="24" fill="#4b3425"/>
+  <rect x="980" y="390" width="16" height="110" fill="#2f4858"/>
+  <rect x="1110" y="365" width="16" height="135" fill="#2f4858"/>
+  <rect x="1230" y="402" width="16" height="98" fill="#2f4858"/>
+  <rect x="870" y="520" width="520" height="38" fill="#2d2a32"/>
+  <rect x="920" y="490" width="72" height="40" fill="#c97b63"/>
+  <rect x="1004" y="490" width="72" height="40" fill="#d9a066"/>
+  <rect x="1088" y="490" width="72" height="40" fill="#c97b63"/>
+  <rect x="1172" y="490" width="72" height="40" fill="#d9a066"/>
+  <rect x="1256" y="490" width="72" height="40" fill="#c97b63"/>
+  <path d="M240 620 L300 470 L360 620 Z" fill="#1e2d3d"/>
+  <rect x="286" y="512" width="28" height="100" fill="#ffb703"/>
+  <path d="M420 620 L480 485 L540 620 Z" fill="#22354a"/>
+  <rect x="468" y="530" width="24" height="82" fill="#fb8500"/>
+  <path d="M590 620 L646 500 L700 620 Z" fill="#1e2d3d"/>
+  <rect x="632" y="542" width="24" height="70" fill="#ffb703"/>
+  <text x="80" y="120" fill="#f8fafc" font-size="48" font-family="Arial, sans-serif" font-weight="700">ReliefLink</text>
+  <text x="80" y="178" fill="#e5eef5" font-size="30" font-family="Arial, sans-serif">Replace this with your final hero image in</text>
+  <text x="80" y="220" fill="#e5eef5" font-size="30" font-family="Arial, sans-serif">public/images/hero-tampa-bay.svg or .png</text>
+</svg>

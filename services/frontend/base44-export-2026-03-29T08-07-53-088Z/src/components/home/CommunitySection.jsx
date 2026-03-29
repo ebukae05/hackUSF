@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
-const COMMUNITY_IMAGE = 'https://media.db.com/images/public/69c8d61e4c900fc320fad8c2/a2c58f5cd_generated_5726d5e7.png';
+const COMMUNITY_IMAGE = '/images/community-cleanup.svg';
 
 export default function CommunitySection() {
   return (

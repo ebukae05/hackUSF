@@ -287,3 +287,70 @@ class TestNeedMapperA2A:
         msg = self.mapper.get_a2a_message(result["needs"])
         assert "needs_summary" in msg
         assert msg["needs_summary"]["total_unfulfilled"] > 0
+
+
+class TestNeedMapperSentinelAndEnvVar:
+    """Issue 1 + 2: -999 sentinel regression and SVI_CSV_PATH env var path."""
+
+    def test_negative_999_sentinel_maps_to_0_5_not_0(self, tmp_path):
+        """Issue 1 fix: CDC -999 missing-data sentinel must not become 0.0 vulnerability."""
+        import pandas as pd
+
+        svi_data = {
+            "FIPS": ["12057000001", "12057000002"],
+            "STATE": ["Florida", "Florida"],
+            "ST_ABBR": ["FL", "FL"],
+            "STCNTY": ["12057", "12057"],
+            "COUNTY": ["Hillsborough", "Hillsborough"],
+            "LOCATION": ["Tract 1", "Tract 2"],
+            "E_TOTPOP": [5000, 3000],
+            "RPL_THEMES": [-999, 0.8],      # -999 is CDC missing-data sentinel
+            "RPL_THEME1": [-999, 0.7],
+            "RPL_THEME2": [-999, 0.6],
+            "RPL_THEME3": [-999, 0.9],
+            "RPL_THEME4": [-999, 0.75],
+        }
+        csv_path = tmp_path / "svi_sentinel.csv"
+        pd.DataFrame(svi_data).to_csv(csv_path, index=False)
+
+        mapper = NeedMapper(svi_csv_path=str(csv_path))
+        result = mapper.assess(disaster_footprint=["12057"], disaster_severity=7.0)
+
+        communities = result["communities"]
+        assert len(communities) == 2
+
+        sentinel_community = next(c for c in communities if c.fips_tract == "12057000001")
+        normal_community = next(c for c in communities if c.fips_tract == "12057000002")
+
+        # -999 must map to 0.5 (neutral), NOT 0.0
+        assert sentinel_community.vulnerability_index == pytest.approx(0.5, abs=0.01), (
+            f"Expected 0.5 for -999 sentinel, got {sentinel_community.vulnerability_index}"
+        )
+        assert normal_community.vulnerability_index == pytest.approx(0.8, abs=0.01)
+
+    def test_svi_csv_path_env_var_is_used(self, tmp_path, monkeypatch):
+        """Issue 2 fix: SVI_CSV_PATH env var load path must be exercised."""
+        import pandas as pd
+
+        svi_data = {
+            "FIPS": ["12103000001"],
+            "STATE": ["Florida"],
+            "ST_ABBR": ["FL"],
+            "STCNTY": ["12103"],
+            "COUNTY": ["Pinellas"],
+            "LOCATION": ["Tract 1"],
+            "E_TOTPOP": [4000],
+            "RPL_THEMES": [0.9],
+            "RPL_THEME1": [0.85], "RPL_THEME2": [0.88],
+            "RPL_THEME3": [0.92], "RPL_THEME4": [0.87],
+        }
+        csv_path = tmp_path / "svi_env.csv"
+        pd.DataFrame(svi_data).to_csv(csv_path, index=False)
+
+        monkeypatch.setenv("SVI_CSV_PATH", str(csv_path))
+        mapper = NeedMapper()  # no explicit path — should pick up env var
+        result = mapper.assess(disaster_footprint=["12103"], disaster_severity=8.0)
+
+        assert len(result["communities"]) == 1
+        assert result["communities"][0].vulnerability_index == pytest.approx(0.9, abs=0.01)
+        assert not result.get("fallback_used", False)

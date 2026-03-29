@@ -37,9 +37,6 @@ logger = logging.getLogger(__name__)
 _DATA_DIR = Path(__file__).parent.parent.parent / "data"
 _BUNDLED_SVI_PATH = _DATA_DIR / "fl_svi_subset.csv"
 
-# Live CDC SVI download URL (verified 2026-03-28, 58MB)
-_LIVE_SVI_URL = "https://svi.cdc.gov/Documents/Data/2022/csv/states/SVI_2022_US.csv"
-
 # Need severity multipliers by disaster type
 _SEVERITY_MULTIPLIERS: Dict[str, float] = {
     "hurricane": 1.0,

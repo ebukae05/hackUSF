@@ -159,6 +159,62 @@ class TestResourceScannerFiltering:
         assert target.resource_id not in filtered_ids
 
 
+class TestResourceScannerEdgeCases:
+    """Issues 3-5: invalid records, get_resources_near_county."""
+
+    def setup_method(self):
+        self.scanner = ResourceScanner()
+
+    def test_invalid_resource_type_skipped(self, tmp_path):
+        """Invalid resource type enum value returns None from _parse_resource — record skipped."""
+        import json
+        from services.relieflink_agents.resource_scanner import _parse_resource
+        bad_record = {
+            "resource_id": "bad-001",
+            "type": "INVALID_TYPE",
+            "subtype": "test",
+            "quantity": 10,
+            "location": {"lat": 27.9, "lon": -82.4, "address": "Test", "fips_code": "12057"},
+            "owner_agency_id": "FEMA",
+            "status": "available",
+        }
+        result = _parse_resource(bad_record)
+        assert result is None
+
+    def test_invalid_resource_status_defaults_to_available(self):
+        """Invalid status enum falls back to AVAILABLE."""
+        from services.relieflink_agents.resource_scanner import _parse_resource
+        record = {
+            "resource_id": "bad-002",
+            "type": "supplies",
+            "subtype": "test",
+            "quantity": 5,
+            "location": {"lat": 27.9, "lon": -82.4, "address": "Test", "fips_code": "12057"},
+            "owner_agency_id": "FEMA",
+            "status": "INVALID_STATUS",
+        }
+        result = _parse_resource(record)
+        assert result is not None
+        from services.relieflink_agents.models import ResourceStatus
+        assert result.status == ResourceStatus.AVAILABLE
+
+    def test_malformed_agency_skipped(self):
+        """Agency record missing required fields returns None."""
+        from services.relieflink_agents.resource_scanner import _parse_agency
+        bad_agency = {"name": "Test Agency"}  # missing agency_id, type, jurisdiction
+        result = _parse_agency(bad_agency)
+        assert result is None
+
+    def test_get_resources_near_county(self):
+        """get_resources_near_county returns only available resources in given county."""
+        result = self.scanner.scan(state="FL", disaster_footprint=["12057"])
+        resources = result["resources"]
+        nearby = self.scanner.get_resources_near_county(resources, "12057")
+        assert all(r.location and r.location.fips_code == "12057" for r in nearby)
+        from services.relieflink_agents.models import ResourceStatus
+        assert all(r.status == ResourceStatus.AVAILABLE for r in nearby)
+
+
 class TestAgencySourceCategory:
     def test_fema_is_federal(self):
         assert _agency_source_category("FEMA") == "federal"

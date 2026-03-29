@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 
 from flask import Flask, jsonify, request
@@ -7,6 +8,8 @@ from flask_cors import CORS
 
 from services.backend.config import get_settings
 from services.backend.pipeline import PipelineTimeoutError, ReliefLinkPipeline
+
+logger = logging.getLogger(__name__)
 
 PIPELINE_TIMEOUT_SECONDS = 120
 
@@ -86,6 +89,7 @@ def create_app(pipeline: ReliefLinkPipeline | None = None) -> Flask:
         return jsonify(
             {
                 "matches": [_match_payload(match) for match in snapshot.matches],
+                "disaster_event": snapshot.disaster_event,
                 "resources": [r if isinstance(r, dict) else r.to_dict() for r in snapshot.resources],
                 "communities": [c if isinstance(c, dict) else c.to_dict() for c in snapshot.communities],
                 "needs": [n if isinstance(n, dict) else n.to_dict() for n in snapshot.needs],
@@ -117,7 +121,12 @@ def create_app(pipeline: ReliefLinkPipeline | None = None) -> Flask:
         pipeline_runner: ReliefLinkPipeline = app.config["PIPELINE"]
         result = pipeline_runner.apply_decision(match_id, decision)
         if result is None:
+            logger.warning("MATCH_NOT_FOUND: match_id=%s", match_id)
             return jsonify({"error": "MATCH_NOT_FOUND", "message": f"No match found for {match_id}."}), 404
+        logger.info(
+            "Operator decision: match_id=%s decision=%s new_status=%s reoptimization=%s",
+            match_id, decision, result.get("new_status"), result.get("reoptimization_triggered"),
+        )
         return jsonify(result)
 
     return app

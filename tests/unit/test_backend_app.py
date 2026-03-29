@@ -31,7 +31,7 @@ def test_run_pipeline_returns_completed_job_status():
     assert payload["status"] == "completed"
     assert payload["pipeline"]["orchestrator"] == "ReliefLinkOrchestrator"
     assert payload["pipeline"]["ingestion_stage"] == "ReliefLinkParallelIngestion"
-    assert payload["pipeline"]["optimization_stage"] == "ReliefLinkMatchLoop"
+    assert payload["pipeline"]["optimization_stage"] == "MatchOptimizationLoop"
 
 
 def test_get_matches_returns_current_matches():
@@ -49,6 +49,7 @@ def test_get_matches_returns_current_matches():
     assert len(payload["needs"]) >= 1
     assert len(payload["agencies"]) >= 1
     assert {"equity_score", "resource_id", "need_id", "routing_plan", "status"}.issubset(payload["matches"][0])
+    assert "disaster_event" in payload  # CF-06 contract requires disaster_event in response
 
 
 def test_match_decision_updates_status_and_reoptimizes():
@@ -57,7 +58,7 @@ def test_match_decision_updates_status_and_reoptimizes():
     client.post("/api/run-pipeline")
     matches = client.get("/api/matches").get_json()["matches"]
 
-    response = client.post(f"/api/matches/{matches[0]['match_id']}/decision", json={"action": "accept"})
+    response = client.post(f"/api/matches/{matches[0]['match_id']}/decision", json={"decision": "accept"})
 
     assert response.status_code == 200
     payload = response.get_json()

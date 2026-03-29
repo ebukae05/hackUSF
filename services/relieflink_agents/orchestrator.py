@@ -99,7 +99,7 @@ async def _run_pipeline_async(state: str = DEFAULT_STATE) -> dict[str, Any]:
             "total_equity_score": match_data.get("total_equity_score", 0.0),
             "orchestrator": "ReliefLinkOrchestrator",
             "parallel_agent": "ReliefLinkParallelIngestion",
-            "loop_agent": "ReliefLinkMatchLoop",
+            "loop_agent": "MatchOptimizationLoop",
             "delta": 0.0 if match_data.get("converged") else 1.0,
         },
     }

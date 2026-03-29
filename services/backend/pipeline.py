@@ -4,6 +4,7 @@ Stores pipeline results as dicts (JSON-ready) to avoid dataclass reconstruction 
 """
 from __future__ import annotations
 
+import logging
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -12,6 +13,8 @@ from threading import Lock
 from typing import Any
 
 from services.relieflink_agents.orchestrator import run_relieflink_pipeline
+
+logger = logging.getLogger(__name__)
 
 
 def utc_now_iso() -> str:
@@ -59,18 +62,25 @@ class ReliefLinkPipeline:
                 },
             }
 
+        logger.info("Pipeline starting. job_id=%s", job_id)
         with ThreadPoolExecutor(max_workers=1) as executor:
             future = executor.submit(self._execute_pipeline, job_id, started_at)
             try:
-                return future.result(timeout=timeout_seconds)
+                result = future.result(timeout=timeout_seconds)
+                logger.info("Pipeline completed. job_id=%s status=%s", job_id, result.get("status"))
+                return result
             except FutureTimeoutError as error:
+                logger.warning("Pipeline timeout. job_id=%s timeout_seconds=%d", job_id, timeout_seconds)
                 with self._lock:
                     self._snapshot.current_job = {
                         "job_id": job_id,
                         "status": "timeout",
                         "started_at": started_at,
                         "completed_at": utc_now_iso(),
+                        "message": f"Pipeline exceeded {timeout_seconds} seconds. Returning partial results.",
                     }
+                    # FM-06: return partial results from whatever was written to snapshot
+                    return dict(self._snapshot.current_job)
                 raise PipelineTimeoutError("Pipeline exceeded 120 seconds.") from error
 
     def apply_decision(self, match_id: str, action: str) -> dict[str, Any] | None:
@@ -90,6 +100,10 @@ class ReliefLinkPipeline:
             if reoptimization_triggered:
                 self._reoptimize_locked()
 
+            logger.info(
+                "Match decision applied. match_id=%s action=%s new_status=%s reoptimization=%s timestamp=%s",
+                match_id, action, target["status"], reoptimization_triggered, utc_now_iso(),
+            )
             return {
                 "match_id": match_id,
                 "new_status": target["status"],

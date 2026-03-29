@@ -13,7 +13,7 @@ test-coverage:
 	pytest --cov=services --cov-report=term-missing
 
 run:
-	flask --app services.backend.app run --port 8080 --debug
+	python3 -m flask --app services.backend.app run --port 8080
 
 deploy:
 	./infra/deploy.sh

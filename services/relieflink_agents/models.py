@@ -218,6 +218,41 @@ class Match:
 
 
 # ---------------------------------------------------------------------------
+# to_dict helpers (used by pipeline.py and API serialization)
+# ---------------------------------------------------------------------------
+
+def _dataclass_to_dict(obj) -> dict:
+    """Recursively convert a dataclass to a JSON-serializable dict."""
+    import dataclasses
+    if dataclasses.is_dataclass(obj) and not isinstance(obj, type):
+        result = {}
+        for f in dataclasses.fields(obj):
+            val = getattr(obj, f.name)
+            if dataclasses.is_dataclass(val):
+                result[f.name] = _dataclass_to_dict(val)
+            elif isinstance(val, list):
+                result[f.name] = [_dataclass_to_dict(i) if dataclasses.is_dataclass(i) else (i.value if hasattr(i, 'value') else i) for i in val]
+            elif hasattr(val, 'value'):  # Enum
+                result[f.name] = val.value
+            else:
+                result[f.name] = val
+        return result
+    return obj
+
+
+# Patch to_dict onto dataclasses at module load — avoids modifying each class individually
+def _add_to_dict(cls):
+    def to_dict(self):
+        return _dataclass_to_dict(self)
+    cls.to_dict = to_dict
+    return cls
+
+
+for _cls in (Agency, DisasterEvent, Resource, Community, Need, Match):
+    _add_to_dict(_cls)
+
+
+# ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 

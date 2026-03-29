@@ -3,6 +3,9 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 
+from dotenv import load_dotenv
+load_dotenv()  # Load .env before anything reads os.getenv
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 

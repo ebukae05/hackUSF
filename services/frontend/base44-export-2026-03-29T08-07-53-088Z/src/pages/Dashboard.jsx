@@ -326,7 +326,7 @@ export default function Dashboard() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-electric">ReliefLink</p>
             <h1 className="text-3xl sm:text-4xl font-bold text-cloud-signal mt-2">
-              Disaster relief resource matching with equity-first routing.
+              Community-first disaster coordination. Resources to the most vulnerable — not the most connected.
             </h1>
             <p className="text-muted-foreground mt-3 max-w-3xl">
               This view follows the system design operator dashboard: Resource Inventory on the left, Needs Map plus SVI Heat in the center, and Match List on the right.

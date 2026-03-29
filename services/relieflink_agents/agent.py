@@ -27,7 +27,7 @@ if str(_PROJECT_ROOT) not in sys.path:
 from google.adk.agents import Agent
 
 
-def run_relieflink_pipeline_tool(state: str = "FL") -> dict:
+async def run_relieflink_pipeline_tool(state: str = "FL") -> dict:
     """
     Run the full ReliefLink disaster response pipeline.
 
@@ -42,8 +42,8 @@ def run_relieflink_pipeline_tool(state: str = "FL") -> dict:
     Returns:
         Pipeline results including matches, communities, resources, and metadata.
     """
-    from services.relieflink_agents.orchestrator import run_relieflink_pipeline
-    result = run_relieflink_pipeline({"state": state})
+    from services.relieflink_agents.orchestrator import _run_pipeline_async
+    result = await _run_pipeline_async(state=state)
 
     disaster = result.get("disaster_event") or {}
     matches = result.get("matches", [])

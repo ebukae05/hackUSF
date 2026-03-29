@@ -117,10 +117,11 @@ def _match_cards(matches: list[dict[str, Any]], resources: dict[str, dict[str, A
             st.markdown(f"**Resource:** {resource.get('subtype', match['resource_id'])}")
             st.markdown(f"**Need:** {need.get('need_type', match['need_id'])}")
             st.markdown(f"**Status:** {match['status'].title()}")
+            routing = match.get("routing_plan") or {}
             st.caption(
-                f"Route: {match['routing_plan'].get('origin', 'Unknown')} -> "
-                f"{match['routing_plan'].get('destination', 'Unknown')} | "
-                f"ETA {match['routing_plan'].get('eta_hours', '?')}h"
+                f"Route: {routing.get('origin', 'Pending')} -> "
+                f"{routing.get('destination', 'Pending')} | "
+                f"ETA {routing.get('eta_hours', 'TBD')}h"
             )
 
             action_columns = st.columns(3)

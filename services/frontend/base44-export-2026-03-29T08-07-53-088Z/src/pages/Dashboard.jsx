@@ -10,11 +10,37 @@ import { Button } from '@/components/ui/button';
 import { queryClientInstance } from '@/lib/query-client';
 import { API_BASE_URL, fetchDashboardState, runPipeline, submitMatchDecision } from '@/api/base44Client';
 
-const COUNTY_BOUNDS = {
-  '12057': [[27.72, -82.68], [28.18, -82.14]],
-  '12103': [[27.60, -82.85], [28.02, -82.55]],
-  default: [[27.45, -82.75], [28.35, -82.0]],
+// County center points for Tampa Bay — tracts are positioned in a grid around each center
+const COUNTY_CENTERS = {
+  '12057': { lat: 27.95, lon: -82.46 }, // Hillsborough
+  '12103': { lat: 27.77, lon: -82.68 }, // Pinellas
+  '12081': { lat: 27.48, lon: -82.57 }, // Manatee
+  '12101': { lat: 28.18, lon: -82.43 }, // Pasco
 };
+const TRACT_SIZE = 0.06;  // degrees per side (~6km) — visible but not overlapping
+const STEP = 0.07;        // spacing between tract centers
+const COLS = 4;           // tracts per row within a county
+
+function computeTractBounds(communities) {
+  const countyIdx = {};
+  return communities.map((community) => {
+    const fips = community.county_fips;
+    const center = COUNTY_CENTERS[fips] || { lat: 27.85, lon: -82.55 };
+    const idx = countyIdx[fips] ?? 0;
+    countyIdx[fips] = idx + 1;
+    const row = Math.floor(idx / COLS);
+    const col = idx % COLS;
+    const lat = center.lat + (row - 1) * STEP;
+    const lon = center.lon + (col - Math.floor(COLS / 2)) * STEP;
+    return {
+      ...community,
+      bounds: [
+        [lat - TRACT_SIZE / 2, lon - TRACT_SIZE / 2],
+        [lat + TRACT_SIZE / 2, lon + TRACT_SIZE / 2],
+      ],
+    };
+  });
+}
 
 function vulnerabilityMeta(score) {
   if (score >= 0.75) return { label: 'High', color: '#cd3a3a' };
@@ -87,6 +113,8 @@ function NeedsMapPanel({ communities, needs }) {
     [communities, needsByTract]
   );
 
+  const communitiesWithBounds = useMemo(() => computeTractBounds(communities), [communities]);
+
   return (
     <section className="rounded-2xl bg-card border border-border p-5 h-full shadow-sm">
       <div className="mb-4">
@@ -105,27 +133,28 @@ function NeedsMapPanel({ communities, needs }) {
                 attribution='&copy; OpenStreetMap contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              {communities.map((community) => {
-                const bounds = COUNTY_BOUNDS[community.county_fips] || COUNTY_BOUNDS.default;
+              {communitiesWithBounds.map((community) => {
                 const need = needsByTract[community.fips_tract];
                 const meta = vulnerabilityMeta(Number(community.vulnerability_index));
                 return (
                   <Rectangle
                     key={community.fips_tract}
-                    bounds={bounds}
+                    bounds={community.bounds}
                     pathOptions={{
                       color: meta.color,
                       fillColor: meta.color,
-                      fillOpacity: 0.35,
-                      weight: 2,
+                      fillOpacity: 0.5,
+                      weight: 1.5,
                     }}
                   >
                     <Tooltip sticky>
                       <div className="text-xs leading-5">
                         <div><strong>Tract:</strong> {community.fips_tract}</div>
+                        <div><strong>County:</strong> {community.county_name}</div>
                         <div><strong>Vulnerability:</strong> {community.vulnerability_index} ({meta.label})</div>
-                        <div><strong>Need Severity:</strong> {need?.severity ?? 'N/A'}</div>
-                        <div><strong>Need Type:</strong> {need?.need_type ?? 'N/A'}</div>
+                        <div><strong>Population:</strong> {community.population?.toLocaleString()}</div>
+                        <div><strong>Need:</strong> {need?.need_type ?? 'N/A'}</div>
+                        <div><strong>Severity:</strong> {need?.severity ?? 'N/A'}</div>
                       </div>
                     </Tooltip>
                   </Rectangle>

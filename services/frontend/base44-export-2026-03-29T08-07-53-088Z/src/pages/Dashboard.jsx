@@ -103,7 +103,7 @@ function NeedsMapPanel({ communities, needs }) {
         const meta = vulnerabilityMeta(Number(community.vulnerability_index));
         return {
           tract: community.fips_tract,
-          county: community.county_fips,
+          county: community.county_name || community.county_fips,
           vulnerability: community.vulnerability_index,
           label: meta.label,
           severity: need?.severity ?? 'N/A',

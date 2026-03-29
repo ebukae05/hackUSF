@@ -63,7 +63,13 @@ def _get_routing_plan(resource: Resource, community: Community) -> Optional[Rout
     Falls back to None on failure — caller uses ROUTING_FALLBACK string.
     """
     try:
+        import os
         import google.generativeai as genai
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            logger.warning("GOOGLE_API_KEY not set — using fallback routing plan.")
+            return None
+        genai.configure(api_key=api_key)
     except ImportError:
         logger.warning("google.generativeai not available — using fallback routing plan.")
         return None

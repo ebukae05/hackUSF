@@ -128,7 +128,7 @@ function NeedsMapPanel({ communities, needs }) {
       ) : (
         <>
           <div className="overflow-hidden rounded-2xl border border-border">
-            <MapContainer center={[27.87, -82.55]} zoom={8} scrollWheelZoom={false} style={{ height: 420, width: '100%' }}>
+            <MapContainer center={[27.85, -82.58]} zoom={7.5} scrollWheelZoom={false} style={{ height: 420, width: '100%' }}>
               <TileLayer
                 attribution='&copy; OpenStreetMap contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

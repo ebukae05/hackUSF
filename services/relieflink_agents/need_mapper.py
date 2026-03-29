@@ -228,6 +228,7 @@ class NeedMapper:
         disaster_footprint: List[str],
         disaster_severity: float,
         disaster_type: str = "hurricane",
+        county_noaa_bonus: Optional[Dict[str, float]] = None,
     ) -> Dict[str, Any]:
         """
         Assess communities and quantify needs for the given disaster footprint.
@@ -236,14 +237,18 @@ class NeedMapper:
           { "communities": [Community, ...], "needs": [Need, ...] }
 
         disaster_footprint: list of 5-digit FIPS county codes
-        disaster_severity:  0-10 float (from DisasterMonitor)
+        disaster_severity:  0-10 float (from DisasterMonitor — FEMA programs + global NOAA bonus)
         disaster_type:      "hurricane" | "flood" | etc.
+        county_noaa_bonus:  per-county NOAA severity adjustment {fips: bonus}
+                            Communities at the storm center get higher severity than edges.
         """
+        self._county_noaa_bonus = county_noaa_bonus or {}
         logger.info(
-            "NeedMapper: assessing footprint=%s severity=%.1f type=%s",
+            "NeedMapper: assessing footprint=%s severity=%.1f type=%s county_noaa=%s",
             disaster_footprint,
             disaster_severity,
             disaster_type,
+            self._county_noaa_bonus,
         )
 
         # Early return for empty footprint - nothing to assess
@@ -409,8 +414,13 @@ class NeedMapper:
                     continue
 
                 # Need severity: scaled by disaster severity and community vulnerability.
-                # High-SVI tracts face compounding impacts (fewer pre-existing resources).
-                base_severity = disaster_severity * severity_multiplier
+                # Per-county NOAA bonus differentiates communities at storm center vs edges.
+                # Communities directly under extreme alerts get higher severity than edge counties.
+                county_fips = community.county_fips
+                noaa_bonus = getattr(self, "_county_noaa_bonus", {}).get(county_fips, 0.0)
+                effective_severity = min(disaster_severity + noaa_bonus, 10.0)
+
+                base_severity = effective_severity * severity_multiplier
                 # Vulnerability amplification: 1.0 to 1.5 range
                 vuln_amplification = 1.0 + (vuln * 0.5)
                 need_severity = min(base_severity * vuln_amplification, 10.0)

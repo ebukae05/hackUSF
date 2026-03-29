@@ -1,12 +1,18 @@
-"""Unit tests for external API clients (FT-02) — P-02: FEMA client, P-03: NOAA client."""
+"""Unit tests for external API clients (FT-02) — P-02: FEMA, P-03: NOAA, P-08: SVI, P-09: Geocoder."""
 import json
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
 
+import pandas as pd
 import pytest
 import requests
 
-from services.relieflink_agents.api_clients import get_disaster_declarations, get_active_alerts
+from services.relieflink_agents.api_clients import (
+    get_disaster_declarations,
+    get_active_alerts,
+    load_svi_data,
+    geocode_address,
+)
 
 
 SAMPLE_FEMA_RESPONSE = {
@@ -212,3 +218,101 @@ class TestGetActiveAlerts:
         with patch("requests.get", side_effect=[mock_resp_fail, mock_resp_ok]):
             result = get_active_alerts("FL")
         assert len(result) == 1
+
+
+class TestLoadSviData:
+    """P-08: CDC SVI client tests."""
+
+    def test_returns_dataframe_with_rpl_themes(self):
+        df = load_svi_data("FL")
+        assert isinstance(df, pd.DataFrame)
+        assert not df.empty
+        assert "RPL_THEMES" in df.columns
+        assert "FIPS" in df.columns
+        assert "STCNTY" in df.columns
+
+    def test_fips_and_stcnty_are_strings(self):
+        df = load_svi_data("FL")
+        assert pd.api.types.is_string_dtype(df["FIPS"])
+        assert pd.api.types.is_string_dtype(df["STCNTY"])
+
+    def test_rpl_themes_values_in_range(self):
+        df = load_svi_data("FL")
+        valid = df[df["RPL_THEMES"] >= 0]["RPL_THEMES"]
+        assert (valid >= 0.0).all()
+        assert (valid <= 1.0).all()
+
+    def test_missing_bundled_file_returns_empty_dataframe(self, monkeypatch):
+        monkeypatch.setattr(
+            "services.relieflink_agents.api_clients._DATA_DIR",
+            Path("/nonexistent/path"),
+        )
+        df = load_svi_data("FL")
+        assert isinstance(df, pd.DataFrame)
+        assert df.empty
+
+    def test_non_fl_state_logs_warning(self, caplog):
+        import logging
+        with caplog.at_level(logging.WARNING, logger="services.relieflink_agents.api_clients"):
+            load_svi_data("TX")
+        assert any("FL-only" in r.message for r in caplog.records)
+
+
+class TestGeocodeAddress:
+    """P-09: Census Geocoder client tests."""
+
+    @pytest.fixture(autouse=True)
+    def no_sleep(self, monkeypatch):
+        monkeypatch.setattr("services.relieflink_agents.api_clients.time.sleep", lambda _: None)
+
+    def test_returns_fips_on_success(self):
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status.return_value = None
+        mock_resp.json.return_value = {
+            "result": {
+                "addressMatches": [{
+                    "geographies": {
+                        "Census Tracts": [{"GEOID": "12057010100"}]
+                    }
+                }]
+            }
+        }
+        with patch("requests.get", return_value=mock_resp):
+            result = geocode_address("123 Main St, Tampa FL")
+        assert result == "12057010100"
+
+    def test_no_matches_returns_none(self):
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status.return_value = None
+        mock_resp.json.return_value = {"result": {"addressMatches": []}}
+        with patch("requests.get", return_value=mock_resp):
+            result = geocode_address("Unknown Address")
+        assert result is None
+
+    def test_timeout_returns_none(self):
+        with patch("requests.get", side_effect=requests.Timeout):
+            result = geocode_address("123 Main St, Tampa FL")
+        assert result is None
+
+    def test_http_error_returns_none(self):
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status.side_effect = requests.HTTPError("500")
+        with patch("requests.get", return_value=mock_resp):
+            result = geocode_address("123 Main St, Tampa FL")
+        assert result is None
+
+    def test_retry_succeeds_on_second_attempt(self):
+        mock_fail = MagicMock()
+        mock_fail.raise_for_status.side_effect = requests.HTTPError("500")
+        mock_ok = MagicMock()
+        mock_ok.raise_for_status.return_value = None
+        mock_ok.json.return_value = {
+            "result": {
+                "addressMatches": [{
+                    "geographies": {"Census Tracts": [{"GEOID": "12057010100"}]}
+                }]
+            }
+        }
+        with patch("requests.get", side_effect=[mock_fail, mock_ok]):
+            result = geocode_address("123 Main St, Tampa FL")
+        assert result == "12057010100"

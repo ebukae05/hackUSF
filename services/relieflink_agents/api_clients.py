@@ -1,7 +1,8 @@
 """
 External API client layer (FT-02).
 Wrappers for FEMA, NOAA, CDC SVI, Census Geocoder with timeout, pacing, and fallback.
-Reference: docs/external_apis/FEMA_API.md, docs/external_apis/NOAA_NWS_API.md
+Reference: docs/external_apis/FEMA_API.md, docs/external_apis/NOAA_NWS_API.md,
+           docs/external_apis/CDC_SVI.md
 """
 import json
 import logging
@@ -9,6 +10,7 @@ import time
 from pathlib import Path
 from typing import Optional
 
+import pandas as pd
 import requests
 
 logger = logging.getLogger(__name__)
@@ -74,6 +76,8 @@ _NOAA_HEADERS = {
     "Accept": "application/geo+json",
 }
 
+_CENSUS_GEOCODER_URL = "https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress"
+
 
 def get_active_alerts(state: str) -> list[dict]:
     """
@@ -103,3 +107,60 @@ def get_active_alerts(state: str) -> list[dict]:
                     "NOAA API unavailable after 2 attempts (%s). Proceeding without active alerts.", exc
                 )
     return []
+
+
+def load_svi_data(state: str = "FL") -> pd.DataFrame:
+    """
+    Load CDC SVI data for the given state as a pandas DataFrame.
+    Uses bundled fl_svi_subset.csv (live 58MB download not feasible for demo).
+    Returns empty DataFrame on failure — callers must handle gracefully (FM-03).
+    Reference: docs/external_apis/CDC_SVI.md
+    """
+    bundled_path = _DATA_DIR / "fl_svi_subset.csv"
+    try:
+        df = pd.read_csv(bundled_path, dtype={"FIPS": str, "STCNTY": str})
+        if state != "FL":
+            logger.warning(
+                "load_svi_data: bundled SVI data is FL-only; state=%s not fully supported.", state
+            )
+        logger.info("load_svi_data: loaded %d rows from bundled SVI data.", len(df))
+        return df
+    except Exception as exc:
+        logger.error(
+            "load_svi_data: failed to load bundled SVI data: %s. Returning empty DataFrame.", exc
+        )
+        return pd.DataFrame()
+
+
+def geocode_address(address: str) -> Optional[str]:
+    """
+    Convert a street address to a Census tract FIPS code using the Census Geocoder API.
+    Returns 11-digit FIPS string or None on failure (non-blocking).
+    Reference: docs/external_apis/CDC_SVI.md (address_to_tract example)
+    """
+    time.sleep(_PACING)
+    params = {
+        "address": address,
+        "benchmark": "Public_AR_Current",
+        "vintage": "Current_Current",
+        "format": "json",
+    }
+    for attempt in range(2):
+        try:
+            resp = requests.get(_CENSUS_GEOCODER_URL, params=params, timeout=_TIMEOUT)
+            resp.raise_for_status()
+            matches = resp.json().get("result", {}).get("addressMatches", [])
+            if matches:
+                tracts = matches[0].get("geographies", {}).get("Census Tracts", [])
+                if tracts:
+                    return tracts[0]["GEOID"]
+            return None
+        except Exception as exc:
+            if attempt == 0:
+                logger.warning("Census Geocoder attempt 1 failed (%s), retrying in 2s...", exc)
+                time.sleep(2)
+            else:
+                logger.warning(
+                    "Census Geocoder unavailable after 2 attempts (%s). Returning None.", exc
+                )
+    return None

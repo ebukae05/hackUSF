@@ -1,6 +1,7 @@
 """
 ADK Dev UI entry point for ReliefLink.
 
+
 Uses an LlmAgent (Gemini 2.5 Flash) so the ADK Dev UI can show traces,
 tool calls, and reasoning steps for the judges.
 
@@ -14,6 +15,15 @@ explains the equity-first results. The Dev UI trace shows:
   - DisasterMonitorAgent, ParallelAgent, MatchOptimizerAgent execution
   - Equity-weighted match results
 """
+import sys
+from pathlib import Path
+
+# Ensure project root is on sys.path so 'services' package is importable
+# when adk web runs from the services/ directory
+_PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+
 from google.adk.agents import Agent
 
 

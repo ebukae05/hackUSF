@@ -65,8 +65,18 @@ streamlit run services/frontend/dashboard.py
 ```
 
 **Terminal 3 — ADK Dev UI (port 8000, optional):**
+
+`adk` may not be on your PATH on Windows. Try in order:
+
 ```bash
-adk web
+# Option 1 — direct module invocation (works without PATH fix)
+python -m adk web
+
+# Option 2 — find and run the Scripts folder directly
+python -c "import sysconfig; print(sysconfig.get_path('scripts'))"
+# Then run: <printed_path>\adk web
+
+# Option 3 — skip entirely (pipeline and dashboard work without it)
 ```
 
 > **Windows note:** If the pipeline fails with an asyncio error, add the following to the top of `services/relieflink_agents/orchestrator.py` before running:

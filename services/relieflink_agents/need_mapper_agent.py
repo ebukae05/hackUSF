@@ -73,10 +73,14 @@ class NeedMapperAgent(BaseAgent):
         severity = disaster_event.get("severity") or self._disaster_severity
         disaster_type = disaster_event.get("disaster_type") or self._disaster_type
 
+        # Per-county NOAA bonus — differentiates severity for communities at storm center vs edges
+        county_noaa_bonus = ctx.session.state.get("county_noaa_bonus", {})
+
         result = mapper.assess(
             disaster_footprint=footprint,
             disaster_severity=severity,
             disaster_type=disaster_type,
+            county_noaa_bonus=county_noaa_bonus,
         )
 
         communities = result["communities"]

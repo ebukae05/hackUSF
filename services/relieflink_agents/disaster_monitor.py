@@ -41,6 +41,40 @@ _SEVERITY_MAP = {
 
 _NOAA_SEVERITY_BONUS = {"Extreme": 1.0, "Severe": 0.5, "Moderate": 0.0, "Minor": -0.5}
 
+# FL county name → FIPS mapping for per-county NOAA severity
+_FL_COUNTY_FIPS = {
+    "hillsborough": "12057",
+    "pinellas": "12103",
+    "manatee": "12081",
+    "pasco": "12101",
+    "polk": "12105",
+    "hernando": "12053",
+    "sarasota": "12115",
+    "charlotte": "12015",
+    "lee": "12071",
+    "collier": "12021",
+}
+
+
+def _build_county_noaa_bonus(alerts: list[dict]) -> dict[str, float]:
+    """
+    Build a per-county NOAA severity bonus map from alert areaDesc fields.
+    Each NOAA alert covers specific counties — we extract those and assign
+    the alert's severity bonus to each county individually.
+    Returns: {fips_code: max_bonus_from_any_covering_alert}
+    """
+    county_bonus: dict[str, float] = {}
+    for alert in alerts:
+        bonus = _NOAA_SEVERITY_BONUS.get(alert.get("severity", ""), 0.0)
+        if bonus == 0.0:
+            continue
+        area_desc = alert.get("areaDesc", "").lower()
+        for county_name, fips in _FL_COUNTY_FIPS.items():
+            if county_name in area_desc:
+                # Keep the highest bonus from any alert covering this county
+                county_bonus[fips] = max(county_bonus.get(fips, 0.0), bonus)
+    return county_bonus
+
 
 def _severity_from_fema_programs(declaration: dict, disaster_type: DisasterType) -> float:
     """
@@ -136,11 +170,17 @@ class DisasterMonitorAgent(BaseAgent):
         # Falls back to disaster type map if no programs declared
         decl_for_severity = declarations[0] if declarations else {}
         base_severity = _severity_from_fema_programs(decl_for_severity, disaster_type)
-        noaa_bonus = max(
+
+        # Per-county NOAA bonus — each county gets the severity bonus from alerts covering it
+        # This differentiates communities at the storm center vs edges of the footprint
+        county_noaa_bonus = _build_county_noaa_bonus(alerts)
+
+        # Global severity uses the highest county bonus (worst-case for overall disaster score)
+        global_noaa_bonus = max(county_noaa_bonus.values(), default=max(
             (_NOAA_SEVERITY_BONUS.get(a.get("severity", ""), 0.0) for a in alerts),
             default=0.0,
-        )
-        severity = min(10.0, base_severity + noaa_bonus)
+        ))
+        severity = min(10.0, base_severity + global_noaa_bonus)
 
         active_alerts = [
             NOAAAlert(
@@ -187,9 +227,13 @@ class DisasterMonitorAgent(BaseAgent):
         }
 
         ctx.session.state["disaster_event"] = output
+        # Store per-county NOAA bonus so NeedMapper can apply differentiated severity per community
+        ctx.session.state["county_noaa_bonus"] = county_noaa_bonus
         logger.info(
-            "DisasterMonitor: ingested disaster_id=%s severity=%.1f alerts=%d fallback=%s",
-            event.disaster_id, event.severity, len(event.active_alerts), fallback_used,
+            "DisasterMonitor: ingested disaster_id=%s severity=%.1f alerts=%d "
+            "county_noaa_bonus=%s fallback=%s",
+            event.disaster_id, event.severity, len(event.active_alerts),
+            county_noaa_bonus, fallback_used,
         )
 
         if False:

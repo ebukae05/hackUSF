@@ -192,7 +192,7 @@ def main() -> None:
             st.warning("Run the pipeline to render Florida tract needs.")
         else:
             deck = pdk.Deck(
-                map_style="mapbox://styles/mapbox/light-v9",
+                map_style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
                 initial_view_state=pdk.ViewState(latitude=27.8, longitude=-82.5, zoom=6.3, pitch=0),
                 tooltip={
                     "html": (

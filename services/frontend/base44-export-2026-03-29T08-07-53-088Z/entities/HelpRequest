@@ -1,0 +1,106 @@
+{
+  "name": "HelpRequest",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "shelter",
+        "food_water",
+        "medical",
+        "transportation",
+        "cleanup",
+        "supplies",
+        "other"
+      ]
+    },
+    "urgency": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "matched",
+        "in_progress",
+        "resolved"
+      ],
+      "default": "open"
+    },
+    "location": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string",
+      "enum": [
+        "Hillsborough",
+        "Pinellas",
+        "Manatee",
+        "Pasco"
+      ]
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "contact_phone": {
+      "type": "string"
+    },
+    "contact_email": {
+      "type": "string"
+    },
+    "people_affected": {
+      "type": "number"
+    },
+    "matched_volunteer_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "category",
+    "urgency",
+    "location",
+    "county",
+    "contact_name"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

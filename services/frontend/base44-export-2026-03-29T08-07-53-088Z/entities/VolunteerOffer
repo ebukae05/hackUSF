@@ -1,0 +1,94 @@
+{
+  "name": "VolunteerOffer",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "shelter",
+        "food_water",
+        "medical",
+        "transportation",
+        "cleanup",
+        "supplies",
+        "other"
+      ]
+    },
+    "availability": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string",
+      "enum": [
+        "Hillsborough",
+        "Pinellas",
+        "Manatee",
+        "Pasco"
+      ]
+    },
+    "contact_phone": {
+      "type": "string"
+    },
+    "contact_email": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "matched",
+        "unavailable"
+      ],
+      "default": "available"
+    },
+    "matched_request_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "category",
+    "county",
+    "contact_email"
+  ],
+  "rls": {
+    "create": {},
+    "read": {},
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

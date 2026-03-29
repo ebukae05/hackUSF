@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Supplies Loading Placeholder</title>
+  <desc id="desc">Placeholder image for volunteers stacking emergency supply boxes.</desc>
+  <defs>
+    <linearGradient id="warehouse" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#adb5bd"/>
+      <stop offset="100%" stop-color="#495057"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#warehouse)"/>
+  <rect y="650" width="1600" height="250" fill="#343a40"/>
+  <rect x="180" y="450" width="130" height="130" fill="#d4a373"/>
+  <rect x="320" y="420" width="130" height="160" fill="#bc6c25"/>
+  <rect x="465" y="455" width="130" height="125" fill="#dda15e"/>
+  <rect x="650" y="390" width="150" height="190" fill="#d4a373"/>
+  <rect x="820" y="430" width="150" height="150" fill="#bc6c25"/>
+  <rect x="990" y="405" width="150" height="175" fill="#dda15e"/>
+  <rect x="1180" y="445" width="150" height="135" fill="#d4a373"/>
+  <path d="M410 720 L470 580 L530 720 Z" fill="#1f2933"/>
+  <rect x="458" y="630" width="22" height="82" fill="#e63946"/>
+  <path d="M880 720 L940 565 L1000 720 Z" fill="#1f2933"/>
+  <rect x="928" y="620" width="22" height="92" fill="#2a9d8f"/>
+  <text x="80" y="120" fill="#f8fafc" font-size="48" font-family="Arial, sans-serif" font-weight="700">Mission Image</text>
+  <text x="80" y="180" fill="#e9ecef" font-size="30" font-family="Arial, sans-serif">Replace this with your final supplies-loading image in</text>
+  <text x="80" y="222" fill="#e9ecef" font-size="30" font-family="Arial, sans-serif">public/images/supplies-loading.svg or .png</text>
+</svg>

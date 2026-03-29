@@ -45,6 +45,14 @@ make run
 streamlit run services/frontend/dashboard.py
 ```
 
+**Terminal 2 (alternative) — React dashboard (port 5173):**
+```bash
+cd services/frontend/base44-export-2026-03-29T08-07-53-088Z
+npm install
+npm run dev
+# → http://localhost:5173
+```
+
 **Terminal 3 — ADK Dev UI (port 8000) — required for demo judges:**
 ```bash
 adk web services --a2a --session_service_uri sqlite:////tmp/relieflink_adk.db

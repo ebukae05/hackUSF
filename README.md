@@ -47,9 +47,10 @@ streamlit run services/frontend/dashboard.py
 
 **Terminal 3 — ADK Dev UI (port 8000) — required for demo judges:**
 ```bash
-adk web services --a2a
+adk web services --a2a --session_service_uri sqlite:////tmp/relieflink_adk.db
 # → http://localhost:8000
-# Select "relieflink_agents" → run pipeline → shows parallel + loop agent execution + A2A
+# Select "relieflink_agents" → type "run" → send
+# Shows: Gemini reasoning → tool call → live FEMA/NOAA data → matches with equity scores
 ```
 
 ### Windows
@@ -78,7 +79,7 @@ python -c "import sysconfig; print(sysconfig.get_path('scripts'))"
 export PATH="/c/Users/<YourName>/AppData/Roaming/Python/Python3xx/Scripts:$PATH"
 
 # Step 3 — run (no trailing slash — works on both Mac and Windows)
-adk web services --a2a
+adk web services --a2a --session_service_uri sqlite:////tmp/relieflink_adk.db
 ```
 
 > **Windows note:** If the pipeline fails with an asyncio error, add the following to the top of `services/relieflink_agents/orchestrator.py` before running:

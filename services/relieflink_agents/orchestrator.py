@@ -25,6 +25,7 @@ from services.relieflink_agents.disaster_monitor import DisasterMonitorAgent
 from services.relieflink_agents.need_mapper_agent import NeedMapperAgent
 from services.relieflink_agents.resource_scanner_agent import ResourceScannerAgent
 from services.relieflink_agents.match_optimizer import MatchOptimizerAgent
+from services.relieflink_agents.equity_evaluator import build_safe_equity_evaluator
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,10 @@ def _build_pipeline(state: str = DEFAULT_STATE, footprint: list[str] | None = No
     fp = footprint or DEFAULT_FOOTPRINT
     return SequentialAgent(
         name="ReliefLinkOrchestrator",
-        description="Sequential pipeline: disaster detection → parallel resource+need mapping → match optimization.",
+        description=(
+            "Sequential pipeline: disaster detection → parallel resource+need mapping "
+            "→ match optimization → equity evaluation and self-correction."
+        ),
         sub_agents=[
             DisasterMonitorAgent(state=state),
             ParallelAgent(
@@ -50,12 +54,14 @@ def _build_pipeline(state: str = DEFAULT_STATE, footprint: list[str] | None = No
                 ],
             ),
             MatchOptimizerAgent(max_iterations=20),
+            build_safe_equity_evaluator(),  # Gemini reviews matches and corrects ordering if needed
         ],
     )
 
 
 async def _run_pipeline_async(state: str = DEFAULT_STATE) -> dict[str, Any]:
     from google.adk.agents.invocation_context import InvocationContext
+    from google.adk.agents.run_config import RunConfig
 
     svc = InMemorySessionService()
     session = await svc.create_session(app_name="relieflink", user_id="operator")
@@ -66,6 +72,7 @@ async def _run_pipeline_async(state: str = DEFAULT_STATE) -> dict[str, Any]:
         invocation_id=str(uuid.uuid4()),
         agent=pipeline,
         session=session,
+        run_config=RunConfig(),
     )
 
     logger.info("ReliefLink pipeline starting. state=%s", state)

@@ -1,0 +1,7 @@
+google-adk
+google-generativeai
+pandas
+requests
+httpx
+flask
+python-dotenv

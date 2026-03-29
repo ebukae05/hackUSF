@@ -1,0 +1,119 @@
+{
+  "metadata": {
+    "description": "Sample FEMA disaster declarations for Florida — fallback data (FT-03)",
+    "source": "FEMA OpenFEMA API v2 (structure matches live API)",
+    "scenario": "Hurricane Helene — Tampa Bay landfall",
+    "generated": "2026-03-28"
+  },
+  "DisasterDeclarationsSummaries": [
+    {
+      "disasterNumber": 4830,
+      "state": "FL",
+      "declarationTitle": "HURRICANE HELENE",
+      "declarationType": "Major Disaster",
+      "declarationDate": "2026-03-25T00:00:00.000Z",
+      "incidentType": "Hurricane",
+      "incidentBeginDate": "2026-03-22T00:00:00.000Z",
+      "incidentEndDate": null,
+      "fipsStateCode": "12",
+      "fipsCountyCode": "057",
+      "designatedArea": "Hillsborough (County)",
+      "programTypeCode": "IA",
+      "iaProgramRequested": true,
+      "ihProgramDeclared": true,
+      "iaProgramDeclared": true,
+      "hmProgramDeclared": true,
+      "paProgramDeclared": true,
+      "hash": "abc123demo"
+    },
+    {
+      "disasterNumber": 4830,
+      "state": "FL",
+      "declarationTitle": "HURRICANE HELENE",
+      "declarationType": "Major Disaster",
+      "declarationDate": "2026-03-25T00:00:00.000Z",
+      "incidentType": "Hurricane",
+      "incidentBeginDate": "2026-03-22T00:00:00.000Z",
+      "incidentEndDate": null,
+      "fipsStateCode": "12",
+      "fipsCountyCode": "103",
+      "designatedArea": "Pinellas (County)",
+      "programTypeCode": "IA",
+      "iaProgramRequested": true,
+      "ihProgramDeclared": true,
+      "iaProgramDeclared": true,
+      "hmProgramDeclared": true,
+      "paProgramDeclared": true,
+      "hash": "def456demo"
+    },
+    {
+      "disasterNumber": 4830,
+      "state": "FL",
+      "declarationTitle": "HURRICANE HELENE",
+      "declarationType": "Major Disaster",
+      "declarationDate": "2026-03-25T00:00:00.000Z",
+      "incidentType": "Hurricane",
+      "incidentBeginDate": "2026-03-22T00:00:00.000Z",
+      "incidentEndDate": null,
+      "fipsStateCode": "12",
+      "fipsCountyCode": "081",
+      "designatedArea": "Manatee (County)",
+      "programTypeCode": "IA",
+      "iaProgramRequested": true,
+      "ihProgramDeclared": true,
+      "iaProgramDeclared": true,
+      "hmProgramDeclared": true,
+      "paProgramDeclared": true,
+      "hash": "ghi789demo"
+    },
+    {
+      "disasterNumber": 4830,
+      "state": "FL",
+      "declarationTitle": "HURRICANE HELENE",
+      "declarationType": "Major Disaster",
+      "declarationDate": "2026-03-25T00:00:00.000Z",
+      "incidentType": "Hurricane",
+      "incidentBeginDate": "2026-03-22T00:00:00.000Z",
+      "incidentEndDate": null,
+      "fipsStateCode": "12",
+      "fipsCountyCode": "101",
+      "designatedArea": "Pasco (County)",
+      "programTypeCode": "IA",
+      "iaProgramRequested": true,
+      "ihProgramDeclared": false,
+      "iaProgramDeclared": true,
+      "hmProgramDeclared": true,
+      "paProgramDeclared": false,
+      "hash": "jkl012demo"
+    }
+  ],
+  "noaa_alerts": [
+    {
+      "alert_id": "NWS-ALERT-001",
+      "event": "Hurricane Warning",
+      "severity": "Extreme",
+      "headline": "Hurricane Warning in effect for Tampa Bay coastal areas",
+      "area_desc": "Hillsborough; Pinellas; Manatee; Pasco",
+      "onset": "2026-03-22T06:00:00-04:00",
+      "expires": "2026-03-24T18:00:00-04:00"
+    },
+    {
+      "alert_id": "NWS-ALERT-002",
+      "event": "Storm Surge Warning",
+      "severity": "Extreme",
+      "headline": "Storm Surge Warning — 10-15 ft possible along Tampa Bay shoreline",
+      "area_desc": "Hillsborough; Pinellas; Manatee",
+      "onset": "2026-03-22T08:00:00-04:00",
+      "expires": "2026-03-23T12:00:00-04:00"
+    },
+    {
+      "alert_id": "NWS-ALERT-003",
+      "event": "Flood Warning",
+      "severity": "Severe",
+      "headline": "Flash Flood Warning for low-lying areas of Hillsborough County",
+      "area_desc": "Hillsborough",
+      "onset": "2026-03-22T14:00:00-04:00",
+      "expires": "2026-03-25T06:00:00-04:00"
+    }
+  ]
+}

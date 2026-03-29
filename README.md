@@ -45,9 +45,11 @@ make run
 streamlit run services/frontend/dashboard.py
 ```
 
-**Terminal 3 — ADK Dev UI (port 8000, optional):**
+**Terminal 3 — ADK Dev UI (port 8000) — required for demo judges:**
 ```bash
 adk web
+# → http://localhost:8000
+# Select "relieflink_agents" → run pipeline → shows parallel + loop agent execution
 ```
 
 ### Windows
@@ -64,19 +66,23 @@ python -m flask --app services.backend.app run --port 8080 --debug
 streamlit run services/frontend/dashboard.py
 ```
 
-**Terminal 3 — ADK Dev UI (port 8000, optional):**
+**Terminal 3 — ADK Dev UI (port 8000) — required for demo judges:**
 
-`adk` may not be on your PATH on Windows. Try in order:
+`adk` may not be on your PATH on Windows. Try in order until one works:
 
 ```bash
-# Option 1 — direct module invocation (works without PATH fix)
+# Option 1 — direct module invocation (most reliable on Windows)
 python -m adk web
 
-# Option 2 — find and run the Scripts folder directly
+# Option 2 — find the Scripts folder and add to PATH permanently
 python -c "import sysconfig; print(sysconfig.get_path('scripts'))"
-# Then run: <printed_path>\adk web
+# Copy the printed path, then in Git Bash:
+# export PATH="<printed_path>:$PATH"
+# adk web
 
-# Option 3 — skip entirely (pipeline and dashboard work without it)
+# Option 3 — run with full path
+python -c "import sysconfig; print(sysconfig.get_path('scripts'))"
+# Then: <printed_path>/adk web
 ```
 
 > **Windows note:** If the pipeline fails with an asyncio error, add the following to the top of `services/relieflink_agents/orchestrator.py` before running:

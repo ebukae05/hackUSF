@@ -62,39 +62,44 @@ def _get_routing_plan(resource: Resource, community: Community) -> Optional[Rout
     Retries up to 3 times with exponential backoff (FM-05).
     Falls back to None on failure — caller uses ROUTING_FALLBACK string.
     """
-    try:
-        import os
-        import google.generativeai as genai
-        api_key = os.getenv("GOOGLE_API_KEY")
-        if not api_key:
-            logger.warning("GOOGLE_API_KEY not set — using fallback routing plan.")
-            return None
-        genai.configure(api_key=api_key)
-    except ImportError:
-        logger.warning("google.generativeai not available — using fallback routing plan.")
+    import os
+    from google import genai as google_genai
+
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        logger.warning("GOOGLE_API_KEY not set — using fallback routing plan.")
         return None
 
     origin = resource.location.address if resource.location else "Unknown staging area"
     destination = community.county_name or community.fips_tract
     prompt = (
-        f"Generate a concise disaster relief routing instruction. "
-        f"Origin: {origin}. Destination: {destination} "
-        f"(FIPS: {community.fips_tract}, pop: {community.population}). "
-        f"Return one sentence with route and estimated ETA."
+        f"Generate a concise disaster relief routing instruction in one sentence. "
+        f"Origin: {origin}. Destination: {destination}, FL "
+        f"(population: {community.population:,}). "
+        f"Include the main highway/route and estimated travel time in minutes."
     )
 
     delays = [1, 2, 4]
     for attempt, delay in enumerate(delays, 1):
         try:
-            model = genai.GenerativeModel(GEMINI_MODEL)
-            response = model.generate_content(prompt)
+            client = google_genai.Client(api_key=api_key)
+            response = client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=prompt,
+            )
             text = (getattr(response, "text", "") or "").strip()
             if text:
+                # Extract ETA in hours from response
+                import re
+                eta = 0.5
+                mins = re.findall(r'(\d+)\s*min', text.lower())
+                if mins:
+                    eta = round(int(mins[0]) / 60, 1)
                 return RoutingPlan(
                     origin=origin,
                     destination=destination,
-                    distance_km=0.0,    # approximation — real distance needs geocoding
-                    eta_hours=0.0,
+                    distance_km=0.0,
+                    eta_hours=eta,
                 )
         except Exception as exc:
             if attempt < len(delays):
@@ -104,8 +109,7 @@ def _get_routing_plan(resource: Resource, community: Community) -> Optional[Rout
                 time.sleep(delay)
             else:
                 logger.error(
-                    "Routing plan generation failed after %d attempts: %s. "
-                    "Returning fallback.",
+                    "Routing plan generation failed after %d attempts: %s. Returning fallback.",
                     attempt, exc,
                 )
     return None

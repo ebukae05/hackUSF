@@ -1,0 +1,34 @@
+[
+  {
+    "disasterNumber": 4844,
+    "declarationTitle": "HURRICANE MILTON",
+    "declarationType": "DR",
+    "incidentType": "Hurricane",
+    "state": "FL",
+    "declarationDate": "2024-10-11T00:00:00.000Z",
+    "incidentBeginDate": "2024-10-09T00:00:00.000Z",
+    "incidentEndDate": "2024-10-11T00:00:00.000Z",
+    "designatedArea": "Hillsborough County",
+    "placeCode": "12057",
+    "ihProgramDeclared": true,
+    "iaProgramDeclared": true,
+    "paProgramDeclared": true,
+    "hmProgramDeclared": true
+  },
+  {
+    "disasterNumber": 4673,
+    "declarationTitle": "HURRICANE IAN",
+    "declarationType": "DR",
+    "incidentType": "Hurricane",
+    "state": "FL",
+    "declarationDate": "2022-09-29T00:00:00.000Z",
+    "incidentBeginDate": "2022-09-23T00:00:00.000Z",
+    "incidentEndDate": "2022-10-01T00:00:00.000Z",
+    "designatedArea": "Lee County",
+    "placeCode": "12071",
+    "ihProgramDeclared": true,
+    "iaProgramDeclared": true,
+    "paProgramDeclared": true,
+    "hmProgramDeclared": true
+  }
+]

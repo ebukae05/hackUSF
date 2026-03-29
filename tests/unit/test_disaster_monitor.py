@@ -16,6 +16,11 @@ SAMPLE_DECLARATIONS = [
         "state": "FL",
         "declarationDate": "2024-10-11T00:00:00.000Z",
         "placeCode": "12057",
+        # FEMA program flags — all active for a major hurricane
+        "iaProgramDeclared": True,
+        "paProgramDeclared": True,
+        "ihProgramDeclared": True,
+        "hmProgramDeclared": True,
     },
     {
         "disasterNumber": 4844,
@@ -24,6 +29,10 @@ SAMPLE_DECLARATIONS = [
         "state": "FL",
         "declarationDate": "2024-10-11T00:00:00.000Z",
         "placeCode": "12103",
+        "iaProgramDeclared": True,
+        "paProgramDeclared": True,
+        "ihProgramDeclared": True,
+        "hmProgramDeclared": True,
     },
 ]
 

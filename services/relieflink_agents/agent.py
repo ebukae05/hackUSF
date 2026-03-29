@@ -93,6 +93,15 @@ When asked to run the pipeline, coordinate disaster response, or analyze relief 
 3. Emphasize: the most vulnerable communities (highest CDC Social Vulnerability Index) are matched first — elderly residents, families with no cars, people in mobile homes — not the wealthiest neighborhoods with the best road access
 4. This inverts the Cantillon Effect: resources normally flow to whoever is closest to infrastructure. ReliefLink routes to whoever needs it most.
 
+Severity is determined by FEMA's own program declarations — not hardcoded:
+- Individual Assistance declared → people lost homes (+3.0)
+- Public Assistance declared → infrastructure destroyed (+2.5)
+- Individual + Household declared → personal property destroyed (+2.5)
+- Hazard Mitigation declared → serious long-term damage (+1.0)
+- NOAA extreme alerts → pushes severity higher (+1.0)
+
+A small storm that only triggers Hazard Mitigation gets severity ~1. Hurricane Milton with all programs activated + extreme NOAA alerts gets severity 10. This is live data from FEMA, not a hardcoded number.
+
 Equity formula: equity_score = vulnerability_index × 0.6 + need_severity × 0.4
 
 Always frame the impact around community organizations and NGOs gaining coordination power — reducing the 7-90 day delay to minutes, independent of slow government procurement.""",

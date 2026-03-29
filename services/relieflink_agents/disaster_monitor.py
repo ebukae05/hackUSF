@@ -27,18 +27,57 @@ _INCIDENT_TYPE_MAP = {
     "Tropical Storm": DisasterType.TROPICAL_STORM,
 }
 
+# Fallback severity by disaster type — used only when FEMA program flags are unavailable
 _SEVERITY_MAP = {
-    DisasterType.HURRICANE: 9.0,
-    DisasterType.FLOOD: 7.0,
-    DisasterType.TORNADO: 8.0,
-    DisasterType.WILDFIRE: 7.5,
-    DisasterType.SEVERE_STORM: 6.0,
-    DisasterType.COASTAL_STORM: 6.5,
-    DisasterType.TROPICAL_STORM: 7.0,
-    DisasterType.OTHER: 5.0,
+    DisasterType.HURRICANE: 7.0,
+    DisasterType.FLOOD: 6.0,
+    DisasterType.TORNADO: 6.5,
+    DisasterType.WILDFIRE: 6.0,
+    DisasterType.SEVERE_STORM: 5.0,
+    DisasterType.COASTAL_STORM: 5.5,
+    DisasterType.TROPICAL_STORM: 5.5,
+    DisasterType.OTHER: 4.0,
 }
 
 _NOAA_SEVERITY_BONUS = {"Extreme": 1.0, "Severe": 0.5, "Moderate": 0.0, "Minor": -0.5}
+
+
+def _severity_from_fema_programs(declaration: dict, disaster_type: DisasterType) -> float:
+    """
+    Calculate severity from FEMA program declarations — more accurate than hardcoding
+    by disaster type because FEMA only activates these programs when real damage justifies it.
+
+    iaProgramDeclared: Individual Assistance — people lost homes, need direct aid (+3.0)
+    paProgramDeclared: Public Assistance — infrastructure destroyed (+2.5)
+    ihProgramDeclared: Individual + Household — personal property destroyed (+2.5)
+    hmProgramDeclared: Hazard Mitigation — serious enough for long-term prevention (+1.0)
+
+    A small storm with only hmProgramDeclared → ~1.0
+    Hurricane Milton with all 4 activated → 9.0 (then NOAA pushes to 10.0)
+    """
+    ia = declaration.get("iaProgramDeclared", False)
+    pa = declaration.get("paProgramDeclared", False)
+    ih = declaration.get("ihProgramDeclared", False)
+    hm = declaration.get("hmProgramDeclared", False)
+
+    # If no programs declared, fall back to disaster type map
+    if not any([ia, pa, ih, hm]):
+        logger.info(
+            "DisasterMonitor: no FEMA program flags found — using disaster type fallback severity"
+        )
+        return _SEVERITY_MAP.get(disaster_type, 4.0)
+
+    severity = 0.0
+    if ia: severity += 3.0   # people need immediate individual help
+    if pa: severity += 2.5   # public infrastructure destroyed
+    if ih: severity += 2.5   # household property destroyed
+    if hm: severity += 1.0   # serious enough for hazard mitigation funding
+
+    logger.info(
+        "DisasterMonitor: FEMA programs IA=%s PA=%s IH=%s HM=%s → base severity %.1f",
+        ia, pa, ih, hm, severity
+    )
+    return min(severity, 9.0)  # cap before NOAA bonus
 
 
 class DisasterMonitorAgent(BaseAgent):
@@ -93,7 +132,10 @@ class DisasterMonitorAgent(BaseAgent):
             geographic_footprint = []
             affected_population = 0
 
-        base_severity = _SEVERITY_MAP.get(disaster_type, 5.0)
+        # Severity from FEMA program declarations (live data-driven, not hardcoded)
+        # Falls back to disaster type map if no programs declared
+        decl_for_severity = declarations[0] if declarations else {}
+        base_severity = _severity_from_fema_programs(decl_for_severity, disaster_type)
         noaa_bonus = max(
             (_NOAA_SEVERITY_BONUS.get(a.get("severity", ""), 0.0) for a in alerts),
             default=0.0,

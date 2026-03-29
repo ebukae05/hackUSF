@@ -74,7 +74,7 @@ def create_app(pipeline: ReliefLinkPipeline | None = None) -> Flask:
                 jsonify(
                     {
                         "error": "PIPELINE_TIMEOUT",
-                        "message": "The ReliefLink agent pipeline exceeded the 120 second timeout.",
+                        "message": "The ReliefLink agent pipeline exceeded the 120 second timeout. Retry the request or check agent logs for slow API calls.",
                         "timeout_seconds": PIPELINE_TIMEOUT_SECONDS,
                     }
                 ),
@@ -122,7 +122,7 @@ def create_app(pipeline: ReliefLinkPipeline | None = None) -> Flask:
         result = pipeline_runner.apply_decision(match_id, decision)
         if result is None:
             logger.warning("MATCH_NOT_FOUND: match_id=%s", match_id)
-            return jsonify({"error": "MATCH_NOT_FOUND", "message": f"No match found for {match_id}."}), 404
+            return jsonify({"error": "MATCH_NOT_FOUND", "message": f"No match found for match_id={match_id}. Run the pipeline first via POST /api/run-pipeline, then retrieve valid match IDs via GET /api/matches."}), 404
         logger.info(
             "Operator decision: match_id=%s decision=%s new_status=%s reoptimization=%s",
             match_id, decision, result.get("new_status"), result.get("reoptimization_triggered"),

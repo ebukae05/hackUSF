@@ -135,7 +135,7 @@ def _match_cards(matches: list[dict[str, Any]], resources: dict[str, dict[str, A
                         _post_json(f"/api/matches/{match['match_id']}/decision", {"decision": action})
                         st.session_state["flash_message"] = f"Match {match['match_id']} updated to {action}."
                     except requests.RequestException as error:
-                        st.session_state["flash_message"] = f"Decision failed: {error}"
+                        st.session_state["flash_message"] = f"Decision failed: {error}. Check the backend is running at {BACKEND_URL} and try again."
                     st.rerun()
 
 
@@ -150,7 +150,7 @@ def main() -> None:
                 job = _post_json("/api/run-pipeline")
                 st.session_state["flash_message"] = f"Pipeline complete: {job['status']} ({job['iterations_run']} iterations)."
             except requests.RequestException as error:
-                st.session_state["flash_message"] = f"Pipeline failed: {error}"
+                st.session_state["flash_message"] = f"Pipeline failed: {error}. Ensure GOOGLE_API_KEY is set and the backend is reachable at {BACKEND_URL}."
         time.sleep(0.5)
         st.rerun()
 

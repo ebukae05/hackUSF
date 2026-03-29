@@ -122,5 +122,5 @@ def run_relieflink_pipeline(
         return {
             "matches": [], "disaster_event": None,
             "agencies": [], "resources": [], "communities": [], "needs": [],
-            "status": "error", "message": str(exc),
+            "status": "error", "message": f"Pipeline failed: {exc}. Check that GOOGLE_API_KEY is set and FEMA/NOAA APIs are reachable. See agent logs for details.",
         }

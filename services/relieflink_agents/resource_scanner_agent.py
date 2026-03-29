@@ -54,10 +54,16 @@ class ResourceScannerAgent(BaseAgent):
     async def _run_async_impl(
         self, ctx: InvocationContext
     ) -> AsyncGenerator[Event, None]:
+        # CF-02 input: read disaster_footprint from DisasterMonitorAgent session state output
+        # (B1 handoff point 1: DisasterMonitor runs before this agent in SequentialAgent)
+        disaster_event = ctx.session.state.get("disaster_event", {})
+        footprint = disaster_event.get("geographic_footprint") or self._disaster_footprint
+        state = disaster_event.get("state") or self._state
+
         scanner = ResourceScanner()
         result = scanner.scan(
-            state=self._state,
-            disaster_footprint=self._disaster_footprint,
+            state=state,
+            disaster_footprint=footprint,
         )
 
         resources = result["resources"]

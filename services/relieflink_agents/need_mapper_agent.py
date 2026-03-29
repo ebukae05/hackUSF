@@ -66,10 +66,17 @@ class NeedMapperAgent(BaseAgent):
                 "NeedMapperAgent A2A: received resources_summary from session state."
             )
 
+        # CF-03 input: read disaster_footprint + severity + type from DisasterMonitorAgent session state
+        # (B1 handoff point 1: DisasterMonitor runs before this agent in SequentialAgent)
+        disaster_event = ctx.session.state.get("disaster_event", {})
+        footprint = disaster_event.get("geographic_footprint") or self._disaster_footprint
+        severity = disaster_event.get("severity") or self._disaster_severity
+        disaster_type = disaster_event.get("disaster_type") or self._disaster_type
+
         result = mapper.assess(
-            disaster_footprint=self._disaster_footprint,
-            disaster_severity=self._disaster_severity,
-            disaster_type=self._disaster_type,
+            disaster_footprint=footprint,
+            disaster_severity=severity,
+            disaster_type=disaster_type,
         )
 
         communities = result["communities"]

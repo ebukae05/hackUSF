@@ -69,9 +69,22 @@ class DisasterMonitorAgent(BaseAgent):
             incident_type_str = decl.get("incidentType", "")
             disaster_type = _INCIDENT_TYPE_MAP.get(incident_type_str, DisasterType.OTHER)
             declared_date = decl.get("declarationDate", "")
+            # Filter to valid Census FIPS county codes only (5-digit, state prefix "12" for FL).
+            # FEMA placeCode also includes statewide/special codes (e.g. 99001) that don't
+            # match Census FIPS and would produce no SVI results downstream.
+            _state_fips = {"FL": "12"}.get(self._state, "")
+            raw_codes = [d.get("placeCode", "") for d in declarations if d.get("placeCode")]
             geographic_footprint = [
-                d.get("placeCode", "") for d in declarations if d.get("placeCode")
+                c for c in raw_codes
+                if len(c) == 5 and (_state_fips == "" or c.startswith(_state_fips))
             ]
+            # If no valid FIPS codes found, fall back to Tampa Bay demo footprint
+            if not geographic_footprint:
+                logger.warning(
+                    "DisasterMonitor: no valid Census FIPS county codes in FEMA placeCode "
+                    "fields (%s). Using Tampa Bay demo footprint.", raw_codes[:5]
+                )
+                geographic_footprint = ["12057", "12103", "12081", "12101"]
             affected_population = len(geographic_footprint) * 50000
         else:
             disaster_id = "FALLBACK-001"

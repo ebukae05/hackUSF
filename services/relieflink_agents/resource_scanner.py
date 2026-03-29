@@ -313,8 +313,23 @@ class ResourceScanner:
             else:
                 resources = all_resources
 
+            # Augment with live FEMA open shelters (federal shelter source)
+            live_shelters = self._load_live_shelters(state)
+            if live_shelters:
+                existing_ids = {r.resource_id for r in resources}
+                new_shelter_count = 0
+                for shelter in live_shelters:
+                    shelter_resource = self._shelter_to_resource(shelter)
+                    if shelter_resource and shelter_resource.resource_id not in existing_ids:
+                        resources.append(shelter_resource)
+                        existing_ids.add(shelter_resource.resource_id)
+                        new_shelter_count += 1
+                logger.info(
+                    "ResourceScanner: added %d live FEMA open shelters", new_shelter_count
+                )
+
             logger.info(
-                "ResourceScanner: loaded %d resources from bundled data (%s)",
+                "ResourceScanner: loaded %d total resources (%s + live shelters)",
                 len(resources),
                 self._fallback_path,
             )
@@ -327,3 +342,47 @@ class ResourceScanner:
                 exc,
             )
             return [], []
+
+    def _load_live_shelters(self, state: str) -> List[dict]:
+        """Fetch live open shelters from FEMA GIS API. Returns [] on failure (non-blocking)."""
+        try:
+            from services.relieflink_agents.api_clients import get_open_shelters
+            return get_open_shelters(state)
+        except Exception as exc:
+            logger.warning("ResourceScanner: live shelter fetch failed: %s", exc)
+            return []
+
+    def _shelter_to_resource(self, shelter: dict) -> Optional[Resource]:
+        """Convert a FEMA shelter dict to a Resource object."""
+        import uuid
+        try:
+            name = shelter.get("facilityname", "Unknown Shelter")
+            address = shelter.get("address", "")
+            city = shelter.get("city", "")
+            zip_code = shelter.get("zip", "")
+            lat = float(shelter.get("latitude") or 0.0)
+            lon = float(shelter.get("longitude") or 0.0)
+            # Use capacity if available, default to 100
+            capacity = int(
+                shelter.get("evacuationcapacity")
+                or shelter.get("postimpactcapacity")
+                or 100
+            )
+            location = Location(
+                lat=lat,
+                lon=lon,
+                address=f"{address}, {city}, FL {zip_code}".strip(", "),
+                fips_code="",  # FEMA shelter API doesn't return FIPS directly
+            )
+            return Resource(
+                resource_id=f"shelter-{str(uuid.uuid4())[:8]}",
+                type=ResourceType.SHELTER,
+                subtype=name,
+                quantity=capacity,
+                location=location,
+                owner_agency_id="FEMA",
+                status=ResourceStatus.AVAILABLE,
+            )
+        except Exception as exc:
+            logger.warning("ResourceScanner: failed to parse shelter record: %s", exc)
+            return None

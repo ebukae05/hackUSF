@@ -19,6 +19,9 @@ _DATA_DIR = Path(__file__).parent.parent.parent / "data"
 
 _FEMA_BASE = "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries"
 _NOAA_BASE = "https://api.weather.gov/alerts/active"
+_FEMA_SHELTERS_BASE = (
+    "https://gis.fema.gov/arcgis/rest/services/NSS/OpenShelters/MapServer/0/query"
+)
 _TIMEOUT = 10
 _PACING = 1.0  # seconds between requests per host
 
@@ -105,6 +108,53 @@ def get_active_alerts(state: str) -> list[dict]:
             else:
                 logger.warning(
                     "NOAA API unavailable after 2 attempts (%s). Proceeding without active alerts.", exc
+                )
+    return []
+
+
+def get_open_shelters(state: str = "FL") -> list[dict]:
+    """
+    Fetch currently open emergency shelters from FEMA's National Shelter System GIS API.
+    Returns list of shelter dicts with name, address, lat/lon, capacity, status.
+    Returns [] on failure — non-blocking per system design.
+    Reference: https://gis.fema.gov/arcgis/rest/services/NSS/OpenShelters/MapServer/0/query
+    Updates every ~20 minutes from FEMA/Red Cross shelter database.
+    """
+    time.sleep(_PACING)
+    params = {
+        "where": f"stateabbreviation='{state}' AND status='OPEN'",
+        "outFields": (
+            "facilityname,address,city,stateabbreviation,zip,"
+            "latitude,longitude,evacuationcapacity,postimpactcapacity,"
+            "totalpopulation,adacompatible,petsallowed,status"
+        ),
+        "returnGeometry": "false",
+        "f": "json",
+        "resultRecordCount": 200,
+    }
+    for attempt in range(2):
+        try:
+            resp = requests.get(
+                _FEMA_SHELTERS_BASE, params=params, timeout=_TIMEOUT
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            features = data.get("features", [])
+            shelters = [f.get("attributes", {}) for f in features if f.get("attributes")]
+            logger.info(
+                "get_open_shelters: %d open shelters found for state=%s", len(shelters), state
+            )
+            return shelters
+        except Exception as exc:
+            if attempt == 0:
+                logger.warning(
+                    "FEMA Shelters API attempt 1 failed (%s), retrying in 2s...", exc
+                )
+                time.sleep(2)
+            else:
+                logger.warning(
+                    "FEMA Shelters API unavailable after 2 attempts (%s). "
+                    "Proceeding without live shelter data.", exc
                 )
     return []
 

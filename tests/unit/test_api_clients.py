@@ -10,6 +10,7 @@ import requests
 from services.relieflink_agents.api_clients import (
     get_disaster_declarations,
     get_active_alerts,
+    get_open_shelters,
     load_svi_data,
     geocode_address,
 )
@@ -316,3 +317,75 @@ class TestGeocodeAddress:
         with patch("requests.get", side_effect=[mock_fail, mock_ok]):
             result = geocode_address("123 Main St, Tampa FL")
         assert result == "12057010100"
+
+
+SAMPLE_SHELTER_RESPONSE = {
+    "features": [
+        {
+            "attributes": {
+                "facilityname": "Hillsborough County Fairgrounds",
+                "address": "4800 US Hwy 301 N",
+                "city": "Tampa",
+                "stateabbreviation": "FL",
+                "zip": "33610",
+                "latitude": 27.974,
+                "longitude": -82.393,
+                "evacuationcapacity": 500,
+                "postimpactcapacity": 400,
+                "totalpopulation": 250,
+                "adacompatible": "Y",
+                "petsallowed": "N",
+                "status": "OPEN",
+            }
+        }
+    ]
+}
+
+
+class TestGetOpenShelters:
+    """Tests for FEMA Open Shelters API client."""
+
+    @pytest.fixture(autouse=True)
+    def no_sleep(self, monkeypatch):
+        monkeypatch.setattr("services.relieflink_agents.api_clients.time.sleep", lambda _: None)
+
+    def test_happy_path_returns_shelter_attributes(self):
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status.return_value = None
+        mock_resp.json.return_value = SAMPLE_SHELTER_RESPONSE
+        with patch("requests.get", return_value=mock_resp):
+            result = get_open_shelters("FL")
+        assert len(result) == 1
+        assert result[0]["facilityname"] == "Hillsborough County Fairgrounds"
+        assert result[0]["status"] == "OPEN"
+        assert result[0]["latitude"] == 27.974
+
+    def test_empty_features_returns_empty_list(self):
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status.return_value = None
+        mock_resp.json.return_value = {"features": []}
+        with patch("requests.get", return_value=mock_resp):
+            result = get_open_shelters("FL")
+        assert result == []
+
+    def test_api_failure_returns_empty_list(self):
+        with patch("requests.get", side_effect=requests.Timeout):
+            result = get_open_shelters("FL")
+        assert result == []
+
+    def test_http_error_returns_empty_list(self):
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status.side_effect = requests.HTTPError("500")
+        with patch("requests.get", return_value=mock_resp):
+            result = get_open_shelters("FL")
+        assert result == []
+
+    def test_retry_succeeds_on_second_attempt(self):
+        mock_fail = MagicMock()
+        mock_fail.raise_for_status.side_effect = requests.HTTPError("503")
+        mock_ok = MagicMock()
+        mock_ok.raise_for_status.return_value = None
+        mock_ok.json.return_value = SAMPLE_SHELTER_RESPONSE
+        with patch("requests.get", side_effect=[mock_fail, mock_ok]):
+            result = get_open_shelters("FL")
+        assert len(result) == 1

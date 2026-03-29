@@ -141,7 +141,7 @@ def _match_cards(matches: list[dict[str, Any]], resources: dict[str, dict[str, A
 
 def main() -> None:
     st.title("ReliefLink")
-    st.caption("Disaster relief resource matching with equity-first routing.")
+    st.caption("Community-first disaster coordination. Resources to the most vulnerable — not the most connected.")
 
     top_columns = st.columns([1, 4])
     if top_columns[0].button("Run Pipeline", type="primary", use_container_width=True):

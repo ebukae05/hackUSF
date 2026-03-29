@@ -33,6 +33,8 @@ cp .env.example .env        # Add your GOOGLE_API_KEY
 
 The backend and dashboard run as two separate processes.
 
+### Mac / Linux
+
 **Terminal 1 — Flask backend (port 8080):**
 ```bash
 make run
@@ -43,29 +45,62 @@ make run
 streamlit run services/frontend/dashboard.py
 ```
 
-Open `http://localhost:8501` in your browser.
-
-**ADK Dev UI (shows agent traces and parallel execution):**
+**Terminal 3 — ADK Dev UI (port 8000, optional):**
 ```bash
 adk web
-# → http://localhost:8000
-# Select "relieflink_agents" and run the pipeline
 ```
+
+### Windows
+
+`make` is not available on Windows by default. Use these commands instead:
+
+**Terminal 1 — Flask backend (port 8080):**
+```bash
+python -m flask --app services.backend.app run --port 8080 --debug
+```
+
+**Terminal 2 — Streamlit dashboard (port 8501):**
+```bash
+streamlit run services/frontend/dashboard.py
+```
+
+**Terminal 3 — ADK Dev UI (port 8000, optional):**
+```bash
+adk web
+```
+
+> **Windows note:** If the pipeline fails with an asyncio error, add the following to the top of `services/relieflink_agents/orchestrator.py` before running:
+> ```python
+> import asyncio, sys
+> if sys.platform == "win32":
+>     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+> ```
+
+Open `http://localhost:8501` in your browser.
 
 ---
 
 ## Running Tests
 
 ```bash
-make test              # All tests
-make test-unit         # Unit tests only
-make test-integration  # Integration tests (calls live FEMA/NOAA APIs)
-make test-coverage     # Tests with coverage report
+# Mac / Linux
+make test
+make test-unit
+make test-integration
+make test-coverage
+
+# Windows
+python -m pytest tests/
+python -m pytest tests/unit/
+python -m pytest tests/integration/
+python -m pytest tests/ --cov=services --cov-report=term-missing
 ```
 
 ---
 
 ## Deploy to Cloud Run
+
+> **Mac / Linux only.** Windows users: use Git Bash or WSL to run the deploy script.
 
 **Prerequisites:**
 ```bash
